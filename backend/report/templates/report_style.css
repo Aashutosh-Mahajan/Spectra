@@ -1,0 +1,222 @@
+/* ═══════════════════════════════════════════════
+   Codebase Audit Report — PDF Stylesheet
+   Neural Ninjas · WeasyPrint Compatible
+   ═══════════════════════════════════════════════ */
+
+@page {
+    size: A4;
+    margin: 2cm 1.5cm 2.5cm 1.5cm;
+
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #6b7280;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    @bottom-left {
+        content: "Neural Ninjas — Codebase Audit";
+        font-size: 8pt;
+        color: #9ca3af;
+    }
+}
+
+/* ── Base Typography ── */
+body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.65;
+    color: #1f2937;
+    max-width: 100%;
+}
+
+/* ── Headings ── */
+h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    color: #111827;
+    border-bottom: 3px solid #3b82f6;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+h2 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #1e40af;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #dbeafe;
+    padding-bottom: 6px;
+    page-break-after: avoid;
+}
+
+h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+}
+
+h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+}
+
+/* ── Tables ── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 10pt;
+    page-break-inside: auto;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tr {
+    page-break-inside: avoid;
+}
+
+th {
+    background: #1e293b;
+    color: #ffffff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+/* ── Code Blocks ── */
+code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Courier New', 'Liberation Mono', monospace;
+    font-size: 9.5pt;
+    color: #be185d;
+}
+
+pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    margin: 10px 0;
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: 9pt;
+}
+
+/* ── Blockquotes (Top Findings) ── */
+blockquote {
+    border-left: 4px solid #3b82f6;
+    margin: 14px 0;
+    padding: 10px 18px;
+    background: #eff6ff;
+    color: #1e40af;
+    border-radius: 0 6px 6px 0;
+    font-size: 10.5pt;
+}
+
+/* ── Severity Colors ── */
+h3:has(+ .extreme), h3[id*="extreme"] { color: #dc2626; }
+h3:has(+ .high), h3[id*="high"] { color: #ea580c; }
+h3:has(+ .medium), h3[id*="medium"] { color: #ca8a04; }
+h3:has(+ .low), h3[id*="low"] { color: #2563eb; }
+
+/* ── Horizontal Rules ── */
+hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 24px 0;
+}
+
+/* ── Lists ── */
+ul, ol {
+    padding-left: 24px;
+    margin: 8px 0;
+}
+
+li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+
+/* ── Header / Footer ── */
+.report-header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 3px solid #3b82f6;
+}
+
+.report-header .brand {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #1e40af;
+    letter-spacing: -0.3px;
+}
+
+.report-header .team {
+    font-size: 11pt;
+    color: #6b7280;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* ── Strong text in tables ── */
+td strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ── Links ── */
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ── Page Break Helpers ── */
+.page-break {
+    page-break-before: always;
+}
+
+/* Keep findings together */
+h4 + table,
+h4 + table + pre {
+    page-break-inside: avoid;
+}
