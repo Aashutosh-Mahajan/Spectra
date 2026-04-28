@@ -280,16 +280,21 @@ IMPORTANT: Respond with ONLY the JSON array, no markdown formatting, no explanat
         Returns:
             List of validated Finding objects
         """
-        # Clean up response — strip markdown code fences if present
+        # Clean up response — robustly extract JSON array
         cleaned = response.strip()
-        if cleaned.startswith("```"):
-            # Remove ```json or ``` markers
-            lines = cleaned.split("\n")
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].strip() == "```":
-                lines = lines[:-1]
-            cleaned = "\n".join(lines)
+        start_idx = cleaned.find('[')
+        end_idx = cleaned.rfind(']')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            cleaned = cleaned[start_idx:end_idx+1]
+        else:
+            # Fallback if the LLM returned a single object instead of an array
+            start_idx = cleaned.find('{')
+            end_idx = cleaned.rfind('}')
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                cleaned = "[" + cleaned[start_idx:end_idx+1] + "]"
+            else:
+                cleaned = "[]"
 
         try:
             raw_findings = json.loads(cleaned)
