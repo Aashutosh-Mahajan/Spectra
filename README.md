@@ -92,7 +92,7 @@ The system divides the auditing labor among these specialized AI agents:
 You can install the CLI globally within your Python environment directly from GitHub using a single command:
 
 ```bash
-pip install git+https://github.com/Aashutosh-Mahajan/codebase-audit-agent.git
+pip install git+https://github.com/Aashutosh-Mahajan/spectra.git
 ```
 
 ### Manual Clone & Install
@@ -100,7 +100,7 @@ If you wish to modify the code or contribute:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Aashutosh-Mahajan/codebase-audit-agent.git
+git clone https://github.com/Aashutosh-Mahajan/spectra.git
 cd codebase-audit-agent
 
 # 2. Create and activate a virtual environment
