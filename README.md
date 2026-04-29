@@ -185,11 +185,27 @@ docker-compose up --build
 
 ## 🔧 Troubleshooting
 
-### PDF Generation Errors (Windows)
-If you see an error like `cannot load library 'libgobject-2.0-0'` during PDF generation on Windows, your system is missing the GTK3 runtime required by WeasyPrint.
+### API Rate Limits
+If you encounter `429 Too Many Requests` from OpenAI, edit your `.spectra/.env` file and lower the `OPENAI_RATE_LIMIT_RPM` variable (default is 20) or ensure your OpenAI account has sufficient credits/tier level.
 
-**Fix:**
-1. Download the **GTK3 Runtime for Windows**: [GTK-for-Windows-Runtime-Installer](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'Add amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
+
+Please ensure your code follows standard Python PEP-8 styling and uses proper type hints.
+
+---
+<p align="center">
+  <em>SPECTRA — Automated, thorough, and professional code auditing.</em>
+</p>
+GTK-for-Windows-Runtime-Environment-Installer/releases).
 2. Install the latest `.exe` release.
 3. **Important**: Check the box **"Add GTK+ to your PATH"** during installation.
 4. Restart your terminal and try again.

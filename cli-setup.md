@@ -95,18 +95,6 @@ The next time you run `spectra` in that same project folder, the CLI will automa
 
 If you ever need to change your API key or Model, you can simply open and edit the `.spectra/.env` file manually.
 
-## 🔧 Troubleshooting
-
-### PDF Generation Issues (Windows)
-If you see an error like `cannot load library 'libgobject-2.0-0'`, it means your Windows system is missing the necessary **GTK+ libraries** that WeasyPrint requires to generate PDFs.
-
-**How to fix it:**
-1. Download the **GTK3 Runtime for Windows** from this repository: [tschoonj/GTK-for-Windows-Runtime-Environment-Installer](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases).
-2. Look for the latest `.exe` (e.g., `gtk3-runtime-3.24.31-2022-05-19-ts-win64.exe`) and run it.
-3. During installation, ensure you check the box that says **"Add GTK+ to your PATH"**.
-4. **Restart your terminal** or VS Code after installation.
-5. Run `spectra` again, and the PDF generation should now work!
-
 ---
 
 ## 📊 Live Progress & Reports
