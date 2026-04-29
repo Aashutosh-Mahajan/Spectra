@@ -3,6 +3,7 @@ PDF Report Generator — converts Markdown reports to styled PDFs using xhtml2pd
 """
 
 import os
+import re
 import logging
 from io import BytesIO
 
@@ -35,6 +36,10 @@ def generate_pdf_report(
     # Convert Markdown to HTML
     md_extensions = ["tables", "fenced_code", "codehilite", "toc", "nl2br"]
     html_body = markdown.markdown(markdown_content, extensions=md_extensions)
+    
+    # Sanitize untested HTML to avoid xhtml2pdf NoneType exceptions
+    html_body = _sanitize_html_tags(html_body)
+    html_body = _add_col_widths_to_tables(html_body)
 
     # Load CSS
     css_content = _load_css()
@@ -84,6 +89,42 @@ def generate_pdf_report(
     except Exception as e:
         logger.error(f"PDF generation failed: {e}")
         return ""
+
+_ALLOWED_TAGS = {
+    'html', 'head', 'meta', 'title', 'style', 'body', 'div', 'main',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'a', 'ul', 'ol', 'li',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'code', 'blockquote',
+    'strong', 'b', 'em', 'i', 'span', 'img', 'hr', 'dl', 'dt', 'dd'
+}
+
+def _sanitize_html_tags(html: str) -> str:
+    """Sanitize arbitrary HTML from markdown to prevent xhtml2pdf NoneType parsing errors."""
+    def replacer(match):
+        tag_full = match.group(0)
+        tag_name = match.group(2).lower()
+        if tag_name not in _ALLOWED_TAGS:
+            if not tag_name.startswith('pdf:'):
+                return tag_full.replace('<', '&lt;').replace('>', '&gt;')
+        return tag_full
+    return re.sub(r'<(/?)([a-zA-Z0-9:]+)\b[^>]*>', replacer, html)
+
+def _add_col_widths_to_tables(html: str) -> str:
+    """Add <col> elements to tables for xhtml2pdf compatibility to prevent NoneType layout errors."""
+    def add_cols(match):
+        table_html = match.group(0)
+        thead_match = re.search(r'<thead>\s*<tr>(.*?)</tr>\s*</thead>', table_html, re.DOTALL | re.IGNORECASE)
+        if not thead_match:
+            return table_html
+        
+        th_content = thead_match.group(1)
+        th_count = len(re.findall(r'<th\b[^>]*>', th_content, re.IGNORECASE))
+        
+        if th_count > 0:
+            width_pct = 100.0 / th_count
+            colgroup = "<colgroup>" + "".join([f'<col width="{width_pct:.2f}%">' for _ in range(th_count)]) + "</colgroup>\n"
+            table_html = table_html.replace('<thead>', colgroup + '<thead>', 1)
+        return table_html
+    return re.sub(r'<table\b[^>]*>.*?</table>', add_cols, html, flags=re.DOTALL | re.IGNORECASE)
 
 
 def _load_css() -> str:
