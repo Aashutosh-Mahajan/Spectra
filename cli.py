@@ -254,6 +254,7 @@ async def run_audit(target_dir: str):
     # Now load the backend graph
     console.print(f"\n  {_icon('info')} [{C_TITLE}]Initializing audit pipeline...[/{C_TITLE}]\n")
     from backend.graph.audit_graph import audit_graph, jobs_store
+    from backend.utils.file_router import DEFAULT_EXCLUDES
 
     job_id = str(uuid.uuid4())
 
@@ -280,10 +281,7 @@ async def run_audit(target_dir: str):
         "branch": "",
         "github_token": None,
         "include_patterns": [],
-        "exclude_patterns": [
-            "node_modules", ".git", "dist", "__pycache__", "venv", ".venv",
-            ".spectra", ".env", ".env.*", "*.env",
-        ],
+        "exclude_patterns": list(DEFAULT_EXCLUDES),
         "max_files_per_agent": int(os.environ.get("MAX_FILES_PER_AGENT", 20)),
         "max_chunks_per_file": int(os.environ.get("MAX_CHUNKS_PER_FILE", 2)),
         "rate_limit_rpm": int(os.environ.get("OPENAI_RATE_LIMIT_RPM", 20)),

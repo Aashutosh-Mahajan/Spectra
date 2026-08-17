@@ -9,6 +9,8 @@ from pathlib import Path
 
 import tiktoken
 
+from backend.utils.file_router import is_crucial_or_sensitive_file
+
 logger = logging.getLogger(__name__)
 
 # Default encoding for GPT models
@@ -52,6 +54,10 @@ def chunk_file(
         - "chunk_index": int — 0-indexed chunk number
         - "total_chunks": int — total number of chunks
     """
+    if is_crucial_or_sensitive_file(file_path):
+        logger.warning(f"Refusing to chunk sensitive/crucial file {file_path}")
+        return []
+
     try:
         content = Path(file_path).read_text(encoding="utf-8", errors="replace")
     except (IOError, OSError) as e:
@@ -139,8 +145,12 @@ def read_file_content(file_path: str) -> str | None:
     """
     Read a file's content safely with UTF-8 encoding.
 
-    Returns None if the file cannot be read.
+    Returns None if the file cannot be read or is a sensitive/crucial file.
     """
+    if is_crucial_or_sensitive_file(file_path):
+        logger.warning(f"Refusing to read sensitive/crucial file {file_path}")
+        return None
+
     try:
         return Path(file_path).read_text(encoding="utf-8", errors="replace")
     except (IOError, OSError) as e:

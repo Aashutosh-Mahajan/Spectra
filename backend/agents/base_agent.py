@@ -17,6 +17,7 @@ from backend.api.models import Finding, FileLocation
 from backend.utils.chunker import chunk_file
 from backend.utils.cache import FileCache
 from backend.utils.rag_manager import RAGContextManager
+from backend.utils.file_router import is_crucial_or_sensitive_file
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +123,16 @@ class BaseAuditAgent(ABC):
         all_findings: list[Finding] = []
         cache = FileCache(repo_path)
         
+        # Filter out any sensitive/crucial files (defense-in-depth)
+        safe_file_paths = []
+        for p in file_paths:
+            if is_crucial_or_sensitive_file(p):
+                logger.warning(f"[{self.agent_name}] Skipping sensitive/crucial file {p}")
+            else:
+                safe_file_paths.append(p)
+
+        file_paths = safe_file_paths
+        
         # Load the RAG Context Manager locally for this agent
         rag_manager = RAGContextManager(repo_path)
         try:
@@ -133,6 +144,8 @@ class BaseAuditAgent(ABC):
         tasks = []
         for rel_path in file_paths:
             abs_path = os.path.join(repo_path, rel_path)
+            if is_crucial_or_sensitive_file(abs_path):
+                continue
             
             # Check cache first
             cached = cache.get_cached_findings(self.agent_name, abs_path, rel_path)
@@ -156,6 +169,8 @@ class BaseAuditAgent(ABC):
 
     async def _analyze_single_file_with_cache(self, cache: FileCache, rag_manager: RAGContextManager, abs_path: str, rel_path: str) -> list[Finding]:
         """Wraps single file analysis to save results to cache."""
+        if is_crucial_or_sensitive_file(rel_path) or is_crucial_or_sensitive_file(abs_path):
+            return []
         findings = await self._analyze_single_file(rag_manager, abs_path, rel_path)
         cache.set_cached_findings(self.agent_name, abs_path, rel_path, findings)
         return findings
@@ -171,6 +186,8 @@ class BaseAuditAgent(ABC):
         Returns:
             List of findings for this file
         """
+        if is_crucial_or_sensitive_file(rel_path) or is_crucial_or_sensitive_file(abs_path):
+            return []
         # Read with high chunk limit to preserve full context for modern LLMs
         chunks = chunk_file(
             abs_path, 

@@ -4,6 +4,7 @@ import os
 import logging
 from pathlib import Path
 from backend.api.models import Finding
+from backend.utils.file_router import is_crucial_or_sensitive_file
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,8 @@ class FileCache:
 
     def _hash_file(self, abs_path: str) -> str | None:
         """Returns the SHA-256 hash of a file's contents."""
+        if is_crucial_or_sensitive_file(abs_path):
+            return None
         hasher = hashlib.sha256()
         try:
             with open(abs_path, 'rb') as f:
@@ -51,6 +54,9 @@ class FileCache:
         Retrieves cached findings if the file hasn't changed.
         Returns None if cache miss or file modified.
         """
+        if is_crucial_or_sensitive_file(rel_path) or is_crucial_or_sensitive_file(abs_path):
+            return None
+
         file_hash = self._hash_file(abs_path)
         if not file_hash:
             return None
@@ -71,6 +77,9 @@ class FileCache:
 
     def set_cached_findings(self, agent_name: str, abs_path: str, rel_path: str, findings: list[Finding]):
         """Saves findings to the cache."""
+        if is_crucial_or_sensitive_file(rel_path) or is_crucial_or_sensitive_file(abs_path):
+            return
+
         file_hash = self._hash_file(abs_path)
         if not file_hash:
             return

@@ -86,41 +86,260 @@ KEYWORD_MAP: dict[str, list[str]] = {
 # .js and .ts are ambiguous — route to both frontend and backend
 AMBIGUOUS_EXTENSIONS = {".js", ".ts"}
 
-# Environment files are deliberately excluded before routing so secrets are not
-# sent to LLMs or reported from SPECTRA's own configuration.
-ENV_PATTERNS = [".env", ".env.*", "*.env", ".env.local", ".env.production"]
-
-# These are always excluded, even if a caller forgets to include them in
-# exclude_patterns. They contain SPECTRA state, reports, caches, and local
-# secrets that should never be audited as project source.
-PROTECTED_EXCLUDES = [
-    ".spectra",
+# ─────────────────────────────────────────────
+# Protected Excludes (Crucial & Sensitive Files)
+# ─────────────────────────────────────────────
+# These files and directories are ALWAYS excluded across all audit scans,
+# routing, chunking, caching, and LLM analysis. They contain credentials,
+# local/production secrets, private keys, certificates, cloud tokens,
+# or internal tool state that must NEVER be exposed or audited.
+PROTECTED_EXCLUDES: list[str] = [
+    # 1. Environment files
     ".env",
     ".env.*",
     "*.env",
+    "*.env.*",
+    ".env*",
+    ".envrc",
+    ".envfile",
+    "env.json",
+    "env.yaml",
+    "env.yml",
+
+    # 2. Secret & Credential configuration files
+    "secrets.json",
+    "secrets.yaml",
+    "secrets.yml",
+    "secrets.toml",
+    "secrets.ini",
+    "secrets.xml",
+    "secret.json",
+    "secret.yaml",
+    "secret.yml",
+    "secret.toml",
+    "secret.ini",
+    "secret.xml",
+    "credentials.json",
+    "credentials.yaml",
+    "credentials.yml",
+    "credentials.toml",
+    "credentials.ini",
+    "credentials.xml",
+    "credential.json",
+    "credential.yaml",
+    "credential.yml",
+    "*credentials*.json",
+    "*credentials*.yaml",
+    "*credentials*.yml",
+    "*service_account*.json",
+    "*service-account*.json",
+    "*serviceaccount*.json",
+    "*firebase-adminsdk*.json",
+    "google-services.json",
+    "googleservice-info.plist",
+    "client_secret*.json",
+    "client_secrets*.json",
+    "oauth-credentials.json",
+    "local.settings.json",
+    "appsettings.*.json",
+    "master.key",
+    "credentials.yml.enc",
+    "auth.json",
+    ".netrc",
+    ".htpasswd",
+    ".npmrc",
+    ".pypirc",
+    ".git-credentials",
+    "terraform.tfvars",
+    "terraform.tfvars.json",
+    "*.tfvars",
+    "*.tfvars.json",
+    "terraform.tfstate*",
+    "*.tfstate*",
+    ".vault-token",
+    "*.kdbx",
+    "*.ovpn",
+
+    # 3. Keys, Certificates & Keystores
+    "*.pem",
+    "*.key",
+    "*.pkcs12",
+    "*.pfx",
+    "*.p12",
+    "*.crt",
+    "*.cer",
+    "*.der",
+    "*.keystore",
+    "*.jks",
+    "*.truststore",
+    "*.ppk",
+    "id_rsa",
+    "id_rsa.*",
+    "*.id_rsa",
+    "*.id_rsa.*",
+    "id_ecdsa",
+    "id_ecdsa.*",
+    "*.id_ecdsa",
+    "*.id_ecdsa.*",
+    "id_ed25519",
+    "id_ed25519.*",
+    "*.id_ed25519",
+    "*.id_ed25519.*",
+    "id_dsa",
+    "id_dsa.*",
+    "*.id_dsa",
+    "*.id_dsa.*",
+
+    # 4. History & Log files containing interactive secrets
+    ".*_history",
+    ".history",
+    "*.history",
+    ".bash_history",
+    ".zsh_history",
+    ".sh_history",
+    ".psql_history",
+    ".mysql_history",
+    ".sqlite_history",
+
+    # 5. Sensitive directories (Cloud / Tool / Auth config)
+    ".spectra",
+    ".spectra/*",
+    ".aws",
+    ".aws/*",
+    "aws_credentials",
+    "aws_config",
+    ".kube",
+    ".kube/*",
+    "kubeconfig",
+    ".kubeconfig",
+    "*kubeconfig*",
+    ".docker",
+    ".docker/*",
+    ".dockercfg",
+    ".ssh",
+    ".ssh/*",
+    ".gnupg",
+    ".gnupg/*",
+    ".secrets",
+    ".secrets/*",
 ]
 
-# Default exclusion patterns
-DEFAULT_EXCLUDES = [
-    "node_modules", ".git", "dist", "build", "__pycache__",
-    ".venv", "venv", ".env", ".env.*", "*.env", ".tox", ".pytest_cache",
-    ".mypy_cache", "*.min.js", "*.min.css", "*.map",
-    ".next", ".nuxt", "coverage", ".nyc_output", ".spectra",
+# Default exclusion patterns (build artifacts, dependencies, caches, VC + protected)
+DEFAULT_EXCLUDES: list[str] = [
+    *PROTECTED_EXCLUDES,
+    "node_modules",
+    "node_modules/*",
+    "vendor",
+    "vendor/*",
+    ".git",
+    ".git/*",
+    ".svn",
+    ".svn/*",
+    ".hg",
+    ".hg/*",
+    "dist",
+    "dist/*",
+    "build",
+    "build/*",
+    "out",
+    "out/*",
+    "target",
+    "target/*",
+    "__pycache__",
+    "__pycache__/*",
+    ".venv",
+    ".venv/*",
+    "venv",
+    "venv/*",
+    "env",
+    "env/*",
+    "virtualenv",
+    "virtualenv/*",
+    ".tox",
+    ".tox/*",
+    ".pytest_cache",
+    ".pytest_cache/*",
+    ".mypy_cache",
+    ".mypy_cache/*",
+    ".ruff_cache",
+    ".ruff_cache/*",
+    "*.min.js",
+    "*.min.css",
+    "*.map",
+    ".next",
+    ".next/*",
+    ".nuxt",
+    ".nuxt/*",
+    ".turbo",
+    ".turbo/*",
+    "coverage",
+    "coverage/*",
+    ".nyc_output",
+    ".nyc_output/*",
+    ".idea",
+    ".idea/*",
+    ".vscode",
+    ".vscode/*",
+    ".ds_store",
+    "thumbs.db",
 ]
+
+
+def is_crucial_or_sensitive_file(path: str) -> bool:
+    """
+    Check whether a file path points to a crucial/sensitive file (e.g. .env,
+    private key, credentials file, cloud token, cert, internal state).
+    """
+    if not path:
+        return False
+    normalized = path.replace("\\", "/").lower().strip("/")
+    parts = Path(normalized).parts
+    filename = parts[-1] if parts else normalized
+
+    for pattern in PROTECTED_EXCLUDES:
+        pattern_lower = pattern.replace("\\", "/").lower().strip("/")
+        # Check against every part in the path
+        for part in parts:
+            if fnmatch.fnmatch(part, pattern_lower):
+                return True
+        # Check against filename directly
+        if fnmatch.fnmatch(filename, pattern_lower):
+            return True
+        # Check against normalized full path
+        if fnmatch.fnmatch(normalized, pattern_lower):
+            return True
+        # Check with leading wildcard if pattern is a file pattern
+        if "/" not in pattern_lower and fnmatch.fnmatch(normalized, f"*/{pattern_lower}"):
+            return True
+
+    return False
 
 
 def _should_exclude(path: str, exclude_patterns: list[str]) -> bool:
-    """Check if a file path matches any exclusion pattern."""
-    normalized_path = path.replace("\\", "/").lower()
+    """Check if a file path matches any exclusion pattern or is a protected sensitive file."""
+    if not path:
+        return False
+    if is_crucial_or_sensitive_file(path):
+        return True
+
+    normalized_path = path.replace("\\", "/").lower().strip("/")
     parts = Path(normalized_path).parts
+    filename = parts[-1] if parts else normalized_path
+
     for pattern in exclude_patterns:
-        pattern = pattern.replace("\\", "/").lower()
+        pattern = pattern.replace("\\", "/").lower().strip("/")
         # Check if any path component matches the pattern
         for part in parts:
             if fnmatch.fnmatch(part, pattern):
                 return True
+        # Check filename directly
+        if fnmatch.fnmatch(filename, pattern):
+            return True
         # Also check the full path
         if fnmatch.fnmatch(normalized_path, pattern):
+            return True
+        # Check with leading wildcard if pattern is a file pattern
+        if "/" not in pattern and fnmatch.fnmatch(normalized_path, f"*/{pattern}"):
             return True
     return False
 
@@ -303,18 +522,12 @@ def route_files(
                         matched_agents.add(agent)
                         break
 
-            # 6. Environment file routing → security
-            for env_pattern in ENV_PATTERNS:
-                if fnmatch.fnmatch(filename, env_pattern) or fnmatch.fnmatch(filename_lower, env_pattern):
-                    matched_agents.add("security")
-                    break
-
-            # 7. CI/CD YAML files in specific directories → devops
+            # 6. CI/CD YAML files in specific directories → devops
             if ext in (".yml", ".yaml"):
                 if any(d in rel_dir.replace("\\", "/") for d in [".github", ".gitlab", ".circleci", "k8s"]):
                     matched_agents.add("devops")
 
-            # 8. ORM-related files → database
+            # 7. ORM-related files → database
             if ".orm." in filename_lower or "migration" in rel_dir.lower():
                 matched_agents.add("database")
 

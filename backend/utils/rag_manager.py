@@ -11,6 +11,7 @@ from rank_bm25 import BM25Okapi
 import tiktoken
 
 from backend.utils.chunker import chunk_file
+from backend.utils.file_router import is_crucial_or_sensitive_file
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,14 @@ class RAGContextManager:
             
         documents = []
         for rel_path in all_rel_paths:
+            if is_crucial_or_sensitive_file(rel_path):
+                logger.warning(f"Skipping sensitive/crucial file {rel_path} from RAG index")
+                continue
+
             abs_path = os.path.join(self.repo_path, rel_path)
+            if is_crucial_or_sensitive_file(abs_path):
+                continue
+
             # Use smaller chunks for retrieval context (approx 500 tokens)
             chunks = chunk_file(abs_path, max_tokens=500, overlap_tokens=50)
             

@@ -11,6 +11,7 @@ import httpx
 
 from backend.agents.base_agent import BaseAuditAgent
 from backend.api.models import Finding, FileLocation
+from backend.utils.file_router import is_crucial_or_sensitive_file
 
 logger = logging.getLogger(__name__)
 OSV_API_BASE = "https://api.osv.dev/v1"
@@ -52,7 +53,11 @@ class DependencyAgent(BaseAuditAgent):
         findings = []
         osv_base = os.environ.get("OSV_API_BASE", OSV_API_BASE)
         for rel_path in file_paths:
+            if is_crucial_or_sensitive_file(rel_path):
+                continue
             abs_path = os.path.join(repo_path, rel_path)
+            if is_crucial_or_sensitive_file(abs_path):
+                continue
             for name, ver, eco in self._extract_packages(abs_path, rel_path):
                 if not ver or ver in ("*", "latest"):
                     continue
@@ -78,6 +83,8 @@ class DependencyAgent(BaseAuditAgent):
 
     def _extract_packages(self, abs_path, rel_path):
         packages = []
+        if is_crucial_or_sensitive_file(rel_path) or is_crucial_or_sensitive_file(abs_path):
+            return packages
         filename = os.path.basename(rel_path).lower()
         try:
             content = open(abs_path, "r", encoding="utf-8", errors="replace").read()
