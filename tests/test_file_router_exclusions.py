@@ -1,15 +1,12 @@
 import os
 import shutil
 import tempfile
-import pytest
 from pathlib import Path
 
 from backend.utils.file_router import (
     is_crucial_or_sensitive_file,
     _should_exclude,
     route_files,
-    PROTECTED_EXCLUDES,
-    DEFAULT_EXCLUDES,
 )
 from backend.utils.chunker import chunk_file, read_file_content
 from backend.utils.cache import FileCache
@@ -284,7 +281,7 @@ def test_file_cache_refuses_sensitive_files():
         assert cache.get_cached_findings("security", env_file, ".env") is None
 
         cache.set_cached_findings("security", env_file, ".env", [])
-        assert f"security:.env" not in cache.cache_data
+        assert "security:.env" not in cache.cache_data
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)

@@ -2,7 +2,6 @@ import json
 import hashlib
 import os
 import logging
-from pathlib import Path
 from backend.api.models import Finding
 from backend.utils.file_router import is_crucial_or_sensitive_file
 
@@ -72,7 +71,7 @@ class FileCache:
                 return findings
             except Exception as e:
                 logger.warning(f"Failed to parse cached findings for {cache_key}: {e}")
-                
+
         return None
 
     def set_cached_findings(self, agent_name: str, abs_path: str, rel_path: str, findings: list[Finding]):
@@ -85,7 +84,7 @@ class FileCache:
             return
 
         cache_key = f"{agent_name}:{rel_path}"
-        
+
         self.cache_data[cache_key] = {
             "hash": file_hash,
             "findings": [f.model_dump() for f in findings]

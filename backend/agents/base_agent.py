@@ -4,10 +4,9 @@ Provides file reading, chunking, LLM integration, and structured response parsin
 """
 
 import os
-import time
 import asyncio
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -96,13 +95,13 @@ class BaseAuditAgent(ABC):
         # which lets us burst in parallel up to max_concurrency.
         concurrency = _read_int_env("MAX_CONCURRENCY", DEFAULT_CONCURRENCY, min_value=1)
         self.semaphore = asyncio.Semaphore(concurrency)
-        
+
         # Initialize LLM with structured output mapping to our Pydantic model
         self.llm = ChatOpenAI(
             model=model_name,
             temperature=temperature,
         ).with_structured_output(AgentFindingsOutput)
-        
+
         self.max_chunks_per_file = (
             max_chunks_per_file
             if max_chunks_per_file is not None
@@ -122,7 +121,7 @@ class BaseAuditAgent(ABC):
         """
         all_findings: list[Finding] = []
         cache = FileCache(repo_path)
-        
+
         # Filter out any sensitive/crucial files (defense-in-depth)
         safe_file_paths = []
         for p in file_paths:
@@ -132,32 +131,32 @@ class BaseAuditAgent(ABC):
                 safe_file_paths.append(p)
 
         file_paths = safe_file_paths
-        
+
         # Load the RAG Context Manager locally for this agent
         rag_manager = RAGContextManager(repo_path)
         try:
             rag_manager.build_or_load_index({}) # Just load, don't build
         except Exception:
             pass
-        
+
         # Gather concurrent tasks for all files
         tasks = []
         for rel_path in file_paths:
             abs_path = os.path.join(repo_path, rel_path)
             if is_crucial_or_sensitive_file(abs_path):
                 continue
-            
+
             # Check cache first
             cached = cache.get_cached_findings(self.agent_name, abs_path, rel_path)
             if cached is not None:
                 all_findings.extend(cached)
                 continue
-                
+
             tasks.append(self._analyze_single_file_with_cache(cache, rag_manager, abs_path, rel_path))
-            
+
         if tasks:
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            
+
             for result in results:
                 if isinstance(result, Exception):
                     logger.error(f"[{self.agent_name}] Error analyzing file: {result}")
@@ -190,8 +189,8 @@ class BaseAuditAgent(ABC):
             return []
         # Read with high chunk limit to preserve full context for modern LLMs
         chunks = chunk_file(
-            abs_path, 
-            max_tokens=DEFAULT_MAX_TOKENS_PER_CHUNK, 
+            abs_path,
+            max_tokens=DEFAULT_MAX_TOKENS_PER_CHUNK,
             overlap_tokens=500
         )
         if not chunks:
@@ -276,7 +275,7 @@ Identify any critical issues and return them structured. If NO issues are found,
                 async with self.semaphore:
                     # `ainvoke` with `.with_structured_output` returns the parsed Pydantic model directly
                     structured_res: AgentFindingsOutput = await self.llm.ainvoke(messages)
-                    
+
                 findings = []
                 for f in structured_res.findings:
                     findings.append(

@@ -5,7 +5,6 @@ PDF Report Generator — converts Markdown reports to styled PDFs using xhtml2pd
 import os
 import re
 import logging
-from io import BytesIO
 
 import markdown
 from pygments.formatters import HtmlFormatter
@@ -36,7 +35,7 @@ def generate_pdf_report(
     # Convert Markdown to HTML
     md_extensions = ["tables", "fenced_code", "codehilite", "toc", "nl2br"]
     html_body = markdown.markdown(markdown_content, extensions=md_extensions)
-    
+
     # Sanitize untested HTML to avoid xhtml2pdf NoneType exceptions
     html_body = _sanitize_html_tags(html_body)
     html_body = _normalize_tables_for_xhtml2pdf(html_body)
@@ -79,11 +78,11 @@ def generate_pdf_report(
     try:
         with open(pdf_path, "w+b") as result_file:
             pisa_status = pisa.CreatePDF(full_html, dest=result_file)
-            
+
         if pisa_status.err:
             logger.error("PDF generation failed with pisa errors.")
             return ""
-            
+
         logger.info(f"PDF report generated: {pdf_path}")
         return os.path.abspath(pdf_path)
     except Exception as e:

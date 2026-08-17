@@ -13,7 +13,7 @@ from typing import Annotated, Optional, TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
-from backend.utils.repo_cloner import clone_repo, cleanup_repo, CloneError
+from backend.utils.repo_cloner import clone_repo, CloneError
 from backend.utils.file_router import route_files
 from backend.utils.rag_manager import RAGContextManager
 from backend.agents.frontend_agent import FrontendAgent
@@ -353,8 +353,8 @@ async def report_writer_node(state: AuditState) -> dict:
     _update_job_status(job_id, current_step="Generating audit report...", progress_percent=90)
 
     report_md = generate_markdown_report(
-        findings=findings, 
-        repo_url=repo_url, 
+        findings=findings,
+        repo_url=repo_url,
         branch=branch,
         orchestrator_summary=orchestrator_summary
     )
@@ -394,7 +394,7 @@ async def report_writer_node(state: AuditState) -> dict:
         "orchestrator_summary": orchestrator_summary,
         "report_md": report_md,
         "report_md_path": os.path.abspath(md_path),
-        "report_pdf_path": pdf_path, 
+        "report_pdf_path": pdf_path,
         "status": "done"
     }
 

@@ -6,8 +6,7 @@ from all specialist agents.
 import logging
 from collections import defaultdict
 
-from backend.api.models import Finding, FileLocation
-from backend.utils.severity import score_to_severity, calculate_severity_score
+from backend.utils.severity import score_to_severity
 
 logger = logging.getLogger(__name__)
 

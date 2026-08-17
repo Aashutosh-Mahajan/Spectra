@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class OrchestratorAgent:
     """
     Synthesizes the final output from all specialist agents.
-    Provides an executive summary, critical risk assessment, and 
+    Provides an executive summary, critical risk assessment, and
     architectural recommendations to make the audit report foolproof.
     """
     agent_name = "orchestrator"
@@ -67,11 +67,11 @@ IMPORTANT: Respond with ONLY the valid JSON object. Do not include markdown form
             "critical_findings_count": len(critical_findings),
             "other_findings_count": len(other_findings),
             "critical_samples": [
-                {"title": f.get("title"), "bug_type": f.get("bug_type"), "agent": f.get("agent", "unknown")} 
+                {"title": f.get("title"), "bug_type": f.get("bug_type"), "agent": f.get("agent", "unknown")}
                 for f in critical_findings
             ],
             "other_samples": [
-                {"title": f.get("title"), "bug_type": f.get("bug_type"), "agent": f.get("agent", "unknown")} 
+                {"title": f.get("title"), "bug_type": f.get("bug_type"), "agent": f.get("agent", "unknown")}
                 for f in other_findings
             ]
         }
@@ -92,13 +92,13 @@ Generate the foolproof executive report as requested."""
         try:
             response = await self.llm.ainvoke(messages)
             cleaned = response.content.strip()
-            
+
             # Robust JSON extraction
             start_idx = cleaned.find('{')
             end_idx = cleaned.rfind('}')
             if start_idx != -1 and end_idx != -1 and end_idx >= start_idx:
                 cleaned = cleaned[start_idx:end_idx+1]
-            
+
             result = json.loads(cleaned)
             return result
         except Exception as e:

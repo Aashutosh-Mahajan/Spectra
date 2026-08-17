@@ -401,13 +401,13 @@ def _is_backend_js(content: str) -> bool:
     ]
     # Common Frontend imports/globals
     frontend_indicators = [
-        "import React", "from 'react'", "document.getElement", 
+        "import React", "from 'react'", "document.getElement",
         "window.", "vue", "svelte", "angular"
     ]
-    
+
     b_score = sum(1 for ind in backend_indicators if ind in content)
     f_score = sum(1 for ind in frontend_indicators if ind in content)
-    
+
     return b_score > f_score
 
 def route_files(

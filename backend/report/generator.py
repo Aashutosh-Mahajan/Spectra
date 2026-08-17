@@ -61,22 +61,22 @@ def generate_markdown_report(
     lines.append(f"**Repository:** {repo_url}  ")
     lines.append(f"**Branch:** {branch}  ")
     lines.append(f"**Date:** {timestamp}  ")
-    lines.append(f"**Audited by:** SPECTRA\n")
+    lines.append("**Audited by:** SPECTRA\n")
     lines.append("---\n")
 
     # Orchestrator Executive Summary
     if orchestrator_summary:
         lines.append("## Executive Summary\n")
         lines.append(f"{orchestrator_summary.get('executive_summary', '')}\n")
-        
+
         lines.append(f"**Architectural Health Score:** {orchestrator_summary.get('health_score', 100)}/100\n")
-        
+
         if orchestrator_summary.get("systemic_issues"):
             lines.append("### Systemic Issues")
             for issue in orchestrator_summary["systemic_issues"]:
                 lines.append(f"- {issue}")
             lines.append("")
-            
+
         if orchestrator_summary.get("key_recommendations"):
             lines.append("### Key Recommendations")
             for rec in orchestrator_summary["key_recommendations"]:
@@ -151,7 +151,7 @@ def generate_markdown_report(
             affected_code = f.get("affected_code", "")
             if affected_code:
                 lines.append("**Affected Code:**")
-                lines.append(f"```")
+                lines.append("```")
                 lines.append(affected_code)
                 lines.append("```\n")
 

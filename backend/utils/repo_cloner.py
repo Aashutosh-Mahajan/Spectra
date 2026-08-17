@@ -7,7 +7,6 @@ import os
 import sys
 import shutil
 import logging
-from pathlib import Path
 from urllib.parse import urlparse
 
 import git

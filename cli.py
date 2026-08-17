@@ -14,7 +14,7 @@ import uuid
 import click
 import time
 import logging
-from dotenv import load_dotenv, set_key
+from dotenv import load_dotenv
 from rich.align import Align
 from rich.console import Console, Group
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
@@ -222,7 +222,7 @@ def setup_config(target_dir):
         hint.append(" again.", style=f"dim {C_SUBTLE}")
 
         body = Group(
-            Text(f"  Setup Required", style=f"bold {C_WARN}", justify="left"),
+            Text("  Setup Required", style=f"bold {C_WARN}", justify="left"),
             Text("  Add your OpenAI key before running the audit.\n", style=C_SUBTLE, justify="left"),
             setup_lines,
             hint,
@@ -338,7 +338,8 @@ async def run_audit(target_dir: str):
 
         except Exception as e:
             console.print(f"\n  {_icon('error')} Audit failed: {e}", style=C_DANGER)
-            import traceback; traceback.print_exc()
+            import traceback
+            traceback.print_exc()
             sys.exit(1)
 
     # --- Results ------------------------------------------------------------------

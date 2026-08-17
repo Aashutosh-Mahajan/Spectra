@@ -23,10 +23,18 @@ setup(
         "pygments>=2.19.0",
         "streamlit>=1.42.0",
         "requests>=2.32.0",
+        "httpx>=0.27.0",
         "tiktoken>=0.9.0",
         "faiss-cpu>=1.7.0",
         "rank_bm25>=0.2.2",
     ],
+    extras_require={
+        "test": [
+            "pytest>=7.0.0",
+            "pytest-asyncio>=0.23.0",
+            "pytest-cov>=4.1.0",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "spectra=cli:main",
