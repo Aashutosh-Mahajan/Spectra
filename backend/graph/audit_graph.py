@@ -224,7 +224,7 @@ async def orchestrator_node(state: AuditState) -> dict:
 
     _update_job_status(
         job_id, current_step=step_msg,
-        progress_percent=20, agents_queued=active_agents,
+        progress_percent=20, agents_queued=active_agents, file_map=file_map,
     )
 
     return {"repo_path": repo_path, "file_map": file_map, "status": "running"}
